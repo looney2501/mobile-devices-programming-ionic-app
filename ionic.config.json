@@ -1,0 +1,7 @@
+{
+  "name": "hotel-management-ionic",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}
