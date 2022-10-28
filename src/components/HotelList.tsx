@@ -1,13 +1,24 @@
 import React from 'react'
 import HotelListItem from './HotelListItem'
+import { getLogger } from '../core/loggerUtils'
+import { useHotelItems } from './useHotels'
+
+const log = getLogger('HotelList')
 
 const HotelList: React.FC = () => {
+  const { hotels } = useHotelItems()
+  log('render')
   return (
     <>
-      <HotelListItem name={'Hotel Steaua'} capacity={140} isAvailable={true} dateRegistered={new Date('24.10.2020')} />
-      <HotelListItem name={'Hotel Margareta'} capacity={200} isAvailable={false} dateRegistered={new Date('24.10.2020')} />
+      {hotels.map(hotel => (
+          <HotelListItem key={hotel.id}
+                         name={hotel.name}
+                         capacity={hotel.capacity}
+                         isAvailable={hotel.isAvailable}
+                         dateRegistered={hotel.dateRegistered}
+          />
+      ))}
     </>
-
   )
 }
 
