@@ -1,5 +1,6 @@
 import { getLogger } from '../core/loggerUtils'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { requestHotels } from '../actions/hotelActions'
 
 const log = getLogger('useItems')
 
@@ -11,16 +12,47 @@ export interface HotelProps {
   dateRegistered: Date;
 }
 
-export interface HotelsProps {
-  hotels: HotelProps[],
+export interface HotelsState {
+  hotels?: HotelProps[],
+  fetching: boolean,
+  fetchingError?: Error
 }
 
-export const useHotelItems: () => HotelsProps = () => {
-  const [hotels, setHotels] = useState([
-    { id: '1', name: 'Hotel Steaua', capacity: 140, isAvailable: true, dateRegistered: new Date('10-24-2020') },
-    { id: '2', name: 'Hotel Margareta', capacity: 200, isAvailable: false, dateRegistered: new Date('01-09-1990') },
-  ])
+export const useHotelItems: () => HotelsState = () => {
+  const [fetching, setFetching] = useState<boolean>(false)
+  const [hotels, setHotels] = useState<HotelProps[]>()
+  const [fetchingError, setFetchingError] = useState<Error>();
 
-  log('returns')
-  return { hotels }
+  useEffect(getHotelsEffect, [])
+
+  log(`returns - fetching = ${fetching}, hotels = ${JSON.stringify(hotels)}`);
+  return { hotels, fetching, fetchingError }
+
+  function getHotelsEffect() {
+    let canceled = false;
+    fetchItems();
+    return () => {
+      canceled = true;
+    }
+
+    async function fetchItems() {
+      try {
+        log('fetchItems started');
+        setFetching(true);
+        const hotels = await requestHotels();
+        log('fetchItems succeeded');
+        if (!canceled) {
+          setFetching(false);
+          setHotels(hotels);
+        }
+      } catch (error) {
+        log('fetchItems failed');
+        if (!canceled) {
+          setFetching(false);
+          // @ts-ignore
+          setFetchingError(error);
+        }
+      }
+    }
+  }
 }
