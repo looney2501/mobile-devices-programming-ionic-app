@@ -20,10 +20,11 @@ import './theme/variables.scss';
 /* Other imports */
 import React from 'react'
 import { Redirect, Route } from 'react-router-dom';
-import { IonApp, IonProgressBar, IonRouterOutlet, setupIonicReact } from '@ionic/react'
+import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react'
 import { IonReactRouter } from '@ionic/react-router';
-import HotelsHomePage from './pages/HotelsHomePage';
+import HotelHomePage from './pages/HotelHomePage';
 import HotelProvider from './services/HotelProvider'
+import HotelCreatePage from './pages/HotelCreatePage'
 
 setupIonicReact();
 
@@ -33,8 +34,8 @@ const App: React.FC = () => (
       <IonReactRouter>
         <IonRouterOutlet>
           <Route exact path="/" render={() => <Redirect to="/hotels" />} />
-          <Route exact path="/hotels" component={HotelsHomePage} />
-          {/*<Route path="/hotels/new" component={HotelCreatePage} />*/}
+          <Route exact path="/hotels" component={HotelHomePage} />
+          <Route path="/hotels/new" component={HotelCreatePage} />
         </IonRouterOutlet>
       </IonReactRouter>
     </HotelProvider>
