@@ -1,9 +1,9 @@
 import React from 'react'
-import { HotelProps } from './useHotels'
 import moment from 'moment/moment'
 import { IonItem } from '@ionic/react'
+import { HotelState } from '../reducers/reducer'
 
-const HotelListItem: React.FC<HotelProps> = (hotel) => {
+const HotelListItem: React.FC<HotelState> = (hotel) => {
   return (
     <IonItem>
       <div>

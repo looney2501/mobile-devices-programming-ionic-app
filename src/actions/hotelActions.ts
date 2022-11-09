@@ -1,4 +1,4 @@
-import { getLogger } from '../core/loggerUtils'
+import { getLogger } from '../utils/loggerUtils'
 import Axios from 'axios'
 
 const log = getLogger('hotelsActions')
@@ -11,7 +11,7 @@ export const requestHotels = () => {
     .get(`${baseUrl}/hotels`)
     .then(res => {
       log('requestHotels - succeeded');
-      return Promise.resolve(res.data);
+      return Promise.resolve(res);
     })
     .catch(err => {
       log('getItems - failed');

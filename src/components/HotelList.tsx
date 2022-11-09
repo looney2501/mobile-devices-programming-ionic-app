@@ -1,17 +1,17 @@
 import React from 'react'
-import { getLogger } from '../core/loggerUtils'
-import { useHotelItems } from './useHotels'
+import { getLogger } from '../utils/loggerUtils'
+import { useHotelsState } from '../hooks/useHotelsState'
 import { IonLoading, IonList } from '@ionic/react'
 import HotelListItem from './HotelListItem'
 
 const log = getLogger('HotelList')
 
 const HotelList: React.FC = () => {
-  const { hotels, fetching, fetchingError } = useHotelItems()
+  const { hotels, isLoading, error } = useHotelsState()
   log('render')
   return (
     <>
-      <IonLoading isOpen={fetching} message="Fetching hotels..." />
+      <IonLoading isOpen={isLoading} message="Fetching hotels..." />
       {hotels && (
         <IonList>
           {hotels.map(hotel => (
@@ -24,8 +24,8 @@ const HotelList: React.FC = () => {
           ))}
         </IonList>
       )}
-      {fetchingError && (
-        <div>{fetchingError.message || 'Failed to fetch items'}</div>
+      {error && (
+        <div>{error.message || 'Failed to fetch items'}</div>
       )}
     </>
   )
