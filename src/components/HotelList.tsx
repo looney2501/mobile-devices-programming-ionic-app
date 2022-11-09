@@ -1,13 +1,13 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { getLogger } from '../utils/loggerUtils'
-import { useHotelsState } from '../hooks/useHotelsState'
 import { IonLoading, IonList } from '@ionic/react'
 import HotelListItem from './HotelListItem'
+import HotelContext from '../services/HotelContext'
 
 const log = getLogger('HotelList')
 
 const HotelList: React.FC = () => {
-  const { hotels, isLoading, error } = useHotelsState()
+  const { hotels, isLoading, error } = useContext(HotelContext)
   log('render')
   return (
     <>
