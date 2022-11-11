@@ -77,6 +77,7 @@ const HotelCreateForm: React.FC<HotelCreateFormProps> = ({ newHotel, setNewHotel
           <IonDatetime
             id="datetime"
             presentation="date"
+            value={dateRegistered?.toISOString()}
             onIonChange={e => {setRegisteredDate(moment(e.detail.value).toDate())}}
           />
         </IonModal>

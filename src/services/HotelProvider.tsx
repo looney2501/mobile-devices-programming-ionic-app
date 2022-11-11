@@ -7,6 +7,7 @@ import { requestGetHotels, requestPostHotels } from '../actions/hotelActions'
 import HotelContext from './HotelContext'
 import { NewHotelProps } from '../components/HotelCreateForm'
 import { save } from 'ionicons/icons'
+import { createWebSocket } from '../utils/createWebSocket'
 
 const log = getLogger('HotelsProvider')
 
@@ -45,7 +46,6 @@ const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
       const response = await requestPostHotels(props)
       const savedHotel = response.data
       log('saveNewHotel - succeeded')
-      dispatch({ type: POST_HOTELS, payload: { hotel: savedHotel } })
     } catch (e) {
       log('savedNewHotel - failed')
       dispatch({ type: UI_ERROR, payload: { error: e } })
@@ -54,7 +54,23 @@ const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
     }
   }
 
+  const wsEffect = () => {
+    log('wfEffect - connecting')
+    const closeWebSocket = createWebSocket(message => {
+      const { event, payload: { hotel } } = message
+      log(`ws message, hotel = ${hotel}`)
+      if (event === 'created') {
+        dispatch({ type: POST_HOTELS, payload: { hotel } })
+      }
+    })
+    return () => {
+      log('wsEffect - disconnecting')
+      closeWebSocket()
+    }
+  }
+
   useEffect(fetchHotels, [])
+  useEffect(wsEffect, [])
 
   const saveHotel = useCallback<PostHotelFunction>(saveNewHotel, [])
   const value = { ...state, saveHotel }

@@ -1,16 +1,17 @@
 import { getLogger } from '../utils/loggerUtils'
-import Axios, { AxiosResponse } from 'axios'
-import { HotelProps } from '../reducers/reducer'
+import Axios from 'axios'
 import { NewHotelProps } from '../components/HotelCreateForm'
 
 const log = getLogger('hotelsActions')
 
-const baseUrl = 'http://localhost:3000'
+export const baseUrl = 'localhost:3000'
+
+//TODO create withLogs function
 
 export const requestGetHotels = () => {
   log('requestGetHotels - started')
   return Axios
-    .get(`${baseUrl}/hotels`)
+    .get(`http://${baseUrl}/hotels`)
     .then(res => {
       log('requestGetHotels - succeeded')
       return Promise.resolve(res)
@@ -24,7 +25,7 @@ export const requestGetHotels = () => {
 export const requestPostHotels = (props: NewHotelProps) => {
   log('requestPostHotels - started')
   return Axios
-    .post(`${baseUrl}/hotels`, props)
+    .post(`http://${baseUrl}/hotels`, props)
     .then(res => {
       log('requestPostHotels - succeeded')
       return Promise.resolve(res)
