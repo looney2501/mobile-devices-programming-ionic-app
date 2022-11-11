@@ -11,8 +11,10 @@ const HotelList: React.FC = () => {
   log('render')
   return (
     <>
-      <IonLoading isOpen={isLoading} message="Fetching hotels..." />
-      {hotels && (
+      <IonLoading isOpen={isLoading} message="Loading..." />
+      {error?  (
+        <div>{error.message || 'Failed to fetch items'}</div>
+      ) : hotels && (
         <IonList>
           {hotels.map(hotel => (
             <HotelListItem key={hotel.id}
@@ -23,9 +25,6 @@ const HotelList: React.FC = () => {
             />
           ))}
         </IonList>
-      )}
-      {error && (
-        <div>{error.message || 'Failed to fetch items'}</div>
       )}
     </>
   )

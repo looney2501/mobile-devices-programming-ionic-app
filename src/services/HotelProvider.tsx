@@ -1,10 +1,12 @@
 import PropTypes from 'prop-types'
-import React, { useEffect, useReducer } from 'react'
+import React, { memo, useCallback, useEffect, useReducer } from 'react'
 import { getLogger } from '../utils/loggerUtils'
 import { initialState, reducer } from '../reducers/reducer'
-import { GET_HOTELS, LOADING_CHANGED, UI_ERROR } from '../actions/actionTypes'
-import { requestHotels } from '../actions/hotelActions'
+import { GET_HOTELS, LOADING_CHANGED, POST_HOTELS, UI_ERROR } from '../actions/actionTypes'
+import { requestGetHotels, requestPostHotels } from '../actions/hotelActions'
 import HotelContext from './HotelContext'
+import { NewHotelProps } from '../components/HotelCreateForm'
+import { save } from 'ionicons/icons'
 
 const log = getLogger('HotelsProvider')
 
@@ -12,13 +14,15 @@ interface HotelProviderProps {
   children: PropTypes.ReactNodeLike
 }
 
+export type PostHotelFunction = (props: NewHotelProps) => Promise<any>
+
 const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
   const fetchHotels = () => {
     log('fetchHotels started')
     dispatch({ type: LOADING_CHANGED, payload: { isLoading: true } })
-    requestHotels().then((response) => {
+    requestGetHotels().then((response) => {
       if (response.status === 200) {
         log('fetchHotels - succeeded')
         dispatch({ type: GET_HOTELS, payload: { hotels: response.data } })
@@ -34,15 +38,33 @@ const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
     })
   }
 
+  const saveNewHotel = async (props: NewHotelProps) => {
+    try {
+      log('saveNewHotel - started')
+      dispatch({ type: LOADING_CHANGED, payload: { isLoading: true } })
+      const response = await requestPostHotels(props)
+      const savedHotel = response.data
+      log('saveNewHotel - succeeded')
+      dispatch({ type: POST_HOTELS, payload: { hotel: savedHotel } })
+    } catch (e) {
+      log('savedNewHotel - failed')
+      dispatch({ type: UI_ERROR, payload: { error: e } })
+    } finally {
+      dispatch({ type: LOADING_CHANGED, payload: { isLoading: false } })
+    }
+  }
+
   useEffect(fetchHotels, [])
 
-  log(`returns - state = ${JSON.stringify(state, null, 2)}`)
+  const saveHotel = useCallback<PostHotelFunction>(saveNewHotel, [])
+  const value = { ...state, saveHotel }
+
+  log(`returns - value = ${JSON.stringify(value, null, 2)}`)
   return (
-    <HotelContext.Provider value={state}>
+    <HotelContext.Provider value={value}>
       {children}
     </HotelContext.Provider>
   )
 }
 
 export default HotelProvider
-
