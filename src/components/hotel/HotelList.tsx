@@ -1,8 +1,8 @@
 import React, { useContext } from 'react'
-import { getLogger } from '../utils/loggerUtils'
+import { getLogger } from '../../utils/loggerUtils'
 import { IonLoading, IonList } from '@ionic/react'
 import HotelListItem from './HotelListItem'
-import HotelContext from '../services/HotelContext'
+import HotelContext from '../../services/HotelContext'
 
 const log = getLogger('HotelList')
 

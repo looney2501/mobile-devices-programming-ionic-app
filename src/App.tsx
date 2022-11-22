@@ -22,9 +22,9 @@ import React from 'react'
 import { Redirect, Route } from 'react-router-dom';
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react'
 import { IonReactRouter } from '@ionic/react-router';
-import HotelHomePage from './pages/HotelHomePage';
+import HotelHomePage from './components/hotel/HotelHomePage';
 import HotelProvider from './services/HotelProvider'
-import HotelCreatePage from './pages/HotelCreatePage'
+import HotelCreatePage from './components/hotel/HotelCreatePage'
 
 setupIonicReact();
 

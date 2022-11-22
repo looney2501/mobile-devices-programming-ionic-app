@@ -1,5 +1,5 @@
 import { HotelProps } from '../reducers/reducer'
-import { baseUrl } from '../actions/hotelActions'
+import { baseUrl } from '../actions/hotel/hotelActions'
 import { getLogger } from './loggerUtils'
 
 interface MessageData {

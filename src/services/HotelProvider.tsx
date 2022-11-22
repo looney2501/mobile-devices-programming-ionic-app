@@ -3,10 +3,9 @@ import React, { memo, useCallback, useEffect, useReducer } from 'react'
 import { getLogger } from '../utils/loggerUtils'
 import { initialState, reducer } from '../reducers/reducer'
 import { GET_HOTELS, LOADING_CHANGED, POST_HOTELS, UI_ERROR } from '../actions/actionTypes'
-import { requestGetHotels, requestPostHotels } from '../actions/hotelActions'
+import { requestGetHotels, requestPostHotels } from '../actions/hotel/hotelActions'
 import HotelContext from './HotelContext'
-import { NewHotelProps } from '../components/HotelCreateForm'
-import { save } from 'ionicons/icons'
+import { NewHotelProps } from '../components/hotel/HotelCreatePage'
 import { createWebSocket } from '../utils/createWebSocket'
 
 const log = getLogger('HotelsProvider')
@@ -20,31 +19,26 @@ export type PostHotelFunction = (props: NewHotelProps) => Promise<any>
 const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState)
 
-  const fetchHotels = () => {
-    log('fetchHotels started')
-    dispatch({ type: LOADING_CHANGED, payload: { isLoading: true } })
-    requestGetHotels().then((response) => {
-      if (response.status === 200) {
-        log('fetchHotels - succeeded')
-        dispatch({ type: GET_HOTELS, payload: { hotels: response.data } })
-      } else {
-        log(`fetchHotels - failed with response code ${response.status}`)
-        dispatch({ type: UI_ERROR, payload: { error: `Error with message ${response.status}` } })
-      }
-      dispatch({ type: LOADING_CHANGED, payload: { isLoading: false } })
-    }).catch((error) => {
+  const fetchHotels = async () => {
+    try {
+      log('fetchHotels started')
+      dispatch({ type: LOADING_CHANGED, payload: { isLoading: true } })
+      const response = await requestGetHotels()
+      log('fetchHotels - succeeded')
+      dispatch({ type: GET_HOTELS, payload: { hotels: response.data } })
+    } catch (e) {
       log('fetchHotels - failed')
-      dispatch({ type: UI_ERROR, payload: { error: error } })
+      dispatch({ type: UI_ERROR, payload: { error: e } })
+    } finally {
       dispatch({ type: LOADING_CHANGED, payload: { isLoading: false } })
-    })
+    }
   }
 
   const saveNewHotel = async (props: NewHotelProps) => {
     try {
       log('saveNewHotel - started')
       dispatch({ type: LOADING_CHANGED, payload: { isLoading: true } })
-      const response = await requestPostHotels(props)
-      const savedHotel = response.data
+      await requestPostHotels(props)
       log('saveNewHotel - succeeded')
     } catch (e) {
       log('savedNewHotel - failed')
@@ -69,7 +63,9 @@ const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
     }
   }
 
-  useEffect(fetchHotels, [])
+  useEffect(() => {
+    fetchHotels()
+  }, [])
   useEffect(wsEffect, [])
 
   const saveHotel = useCallback<PostHotelFunction>(saveNewHotel, [])

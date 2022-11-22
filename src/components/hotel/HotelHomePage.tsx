@@ -8,11 +8,10 @@ import {
   IonHeader,
   IonToolbar
 } from '@ionic/react'
-import React, { useCallback } from 'react'
-import HotelList from '../components/HotelList'
+import React from 'react'
+import HotelList from './HotelList'
 import { add } from 'ionicons/icons'
 import { useHistory } from 'react-router'
-import { getLogger } from '../utils/loggerUtils'
 
 const HotelHomePage: React.FC = () => {
   const history = useHistory()
