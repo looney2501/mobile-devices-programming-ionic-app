@@ -1,8 +1,8 @@
 import { GET_HOTELS, LOADING_CHANGED, UI_ERROR, POST_HOTELS } from '../actions/actionTypes'
-import { PostHotelFunction } from '../services/HotelProvider'
+import { PostHotelFunction } from '../services/hotel/HotelProvider'
 
 export interface HotelProps {
-  id?: string;
+  _id?: string;
   name: string;
   capacity: number;
   isAvailable: boolean;

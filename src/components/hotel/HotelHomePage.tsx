@@ -11,9 +11,9 @@ import {
 import React from 'react'
 import HotelList from './HotelList'
 import { add } from 'ionicons/icons'
-import { useHistory } from 'react-router'
+import { RouteComponentProps, useHistory } from 'react-router'
 
-const HotelHomePage: React.FC = () => {
+const HotelHomePage: React.FC<RouteComponentProps> = () => {
   const history = useHistory()
 
   return (

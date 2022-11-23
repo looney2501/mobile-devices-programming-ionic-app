@@ -18,7 +18,7 @@ import moment from 'moment/moment'
 import { getLogger } from '../../utils/loggerUtils'
 import { InputChangeEventDetail } from '@ionic/core'
 import { IonInputCustomEvent, IonDatetimeCustomEvent, IonCheckboxCustomEvent } from '@ionic/core/dist/types/components'
-import HotelContext from '../../services/HotelContext'
+import HotelContext from '../../services/hotel/HotelContext'
 import { RouteComponentProps } from 'react-router'
 
 export interface NewHotelProps {

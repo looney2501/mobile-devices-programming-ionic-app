@@ -1,12 +1,13 @@
 import PropTypes from 'prop-types'
-import React, { memo, useCallback, useEffect, useReducer } from 'react'
-import { getLogger } from '../utils/loggerUtils'
-import { initialState, reducer } from '../reducers/reducer'
-import { GET_HOTELS, LOADING_CHANGED, POST_HOTELS, UI_ERROR } from '../actions/actionTypes'
-import { requestGetHotels, requestPostHotels } from '../actions/hotel/hotelActions'
+import React, { memo, useCallback, useContext, useEffect, useReducer } from 'react'
+import { getLogger } from '../../utils/loggerUtils'
+import { initialState, reducer } from '../../reducers/reducer'
+import { GET_HOTELS, LOADING_CHANGED, POST_HOTELS, UI_ERROR } from '../../actions/actionTypes'
+import { requestGetHotels, requestPostHotels } from '../../actions/hotelActions'
 import HotelContext from './HotelContext'
-import { NewHotelProps } from '../components/hotel/HotelCreatePage'
-import { createWebSocket } from '../utils/createWebSocket'
+import { NewHotelProps } from '../../components/hotel/HotelCreatePage'
+import { createWebSocket } from '../../utils/webSocketUtils'
+import AuthContext from '../auth/AuthContext'
 
 const log = getLogger('HotelsProvider')
 
@@ -17,15 +18,19 @@ interface HotelProviderProps {
 export type PostHotelFunction = (props: NewHotelProps) => Promise<any>
 
 const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
+  const { token } = useContext(AuthContext)
   const [state, dispatch] = useReducer(reducer, initialState)
 
   const fetchHotels = async () => {
+    if (!token?.trim()) {
+      return
+    }
     try {
       log('fetchHotels started')
       dispatch({ type: LOADING_CHANGED, payload: { isLoading: true } })
-      const response = await requestGetHotels()
+      const hotels = await requestGetHotels(token)
       log('fetchHotels - succeeded')
-      dispatch({ type: GET_HOTELS, payload: { hotels: response.data } })
+      dispatch({ type: GET_HOTELS, payload: { hotels: hotels } })
     } catch (e) {
       log('fetchHotels - failed')
       dispatch({ type: UI_ERROR, payload: { error: e } })
@@ -38,7 +43,8 @@ const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
     try {
       log('saveNewHotel - started')
       dispatch({ type: LOADING_CHANGED, payload: { isLoading: true } })
-      await requestPostHotels(props)
+      log(token)
+      await requestPostHotels(token, props)
       log('saveNewHotel - succeeded')
     } catch (e) {
       log('savedNewHotel - failed')
@@ -50,28 +56,31 @@ const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
 
   const wsEffect = () => {
     log('wfEffect - connecting')
-    const closeWebSocket = createWebSocket(message => {
-      const { event, payload: { hotel } } = message
-      log(`ws message, hotel = ${hotel}`)
-      if (event === 'created') {
-        dispatch({ type: POST_HOTELS, payload: { hotel } })
-      }
-    })
+    let closeWebSocket: () => void
+    if (token?.trim()) {
+      closeWebSocket = createWebSocket(token, message => {
+        const { event, payload: { hotel } } = message
+        log(`ws message, hotel = ${hotel}`)
+        if (event === 'created') {
+          dispatch({ type: POST_HOTELS, payload: { hotel } })
+        }
+      })
+    }
+    // @ts-ignore
     return () => {
       log('wsEffect - disconnecting')
-      closeWebSocket()
+      closeWebSocket?.()
     }
   }
 
-  useEffect(() => {
-    fetchHotels()
-  }, [])
-  useEffect(wsEffect, [])
+  useEffect(() => {fetchHotels()}, [token])
+  useEffect(wsEffect, [token])
 
-  const saveHotel = useCallback<PostHotelFunction>(saveNewHotel, [])
+  const saveHotel = useCallback<PostHotelFunction>(saveNewHotel, [token])
   const value = { ...state, saveHotel }
 
-  log(`returns - value = ${JSON.stringify(value, null, 2)}`)
+  log('returns', value)
+
   return (
     <HotelContext.Provider value={value}>
       {children}

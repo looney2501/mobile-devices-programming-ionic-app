@@ -2,7 +2,7 @@ import React, { useContext } from 'react'
 import { getLogger } from '../../utils/loggerUtils'
 import { IonLoading, IonList } from '@ionic/react'
 import HotelListItem from './HotelListItem'
-import HotelContext from '../../services/HotelContext'
+import HotelContext from '../../services/hotel/HotelContext'
 
 const log = getLogger('HotelList')
 
@@ -17,7 +17,7 @@ const HotelList: React.FC = () => {
       ) : hotels && (
         <IonList>
           {hotels.map(hotel => (
-            <HotelListItem key={hotel.id}
+            <HotelListItem key={hotel._id}
                            name={hotel.name}
                            capacity={hotel.capacity}
                            isAvailable={hotel.isAvailable}

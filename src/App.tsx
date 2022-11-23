@@ -23,22 +23,28 @@ import { Redirect, Route } from 'react-router-dom';
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react'
 import { IonReactRouter } from '@ionic/react-router';
 import HotelHomePage from './components/hotel/HotelHomePage';
-import HotelProvider from './services/HotelProvider'
+import HotelProvider from './services/hotel/HotelProvider'
 import HotelCreatePage from './components/hotel/HotelCreatePage'
+import { Login } from './components/auth/Login'
+import { PrivateRoute } from './components/auth/PrivateRoute'
+import AuthProvider from './services/auth/AuthProvider'
 
 setupIonicReact();
 
 const App: React.FC = () => (
   <IonApp>
-    <HotelProvider>
-      <IonReactRouter>
-        <IonRouterOutlet>
+    <IonReactRouter>
+      <IonRouterOutlet>
+        <AuthProvider>
+          <Route path="/login" component={Login} exact={true} />
+          <HotelProvider>
+            <PrivateRoute exact path="/hotels" component={HotelHomePage} />
+            <PrivateRoute path="/hotels/new" component={HotelCreatePage} />
+          </HotelProvider>
           <Route exact path="/" render={() => <Redirect to="/hotels" />} />
-          <Route exact path="/hotels" component={HotelHomePage} />
-          <Route path="/hotels/new" component={HotelCreatePage} />
-        </IonRouterOutlet>
-      </IonReactRouter>
-    </HotelProvider>
+        </AuthProvider>
+      </IonRouterOutlet>
+    </IonReactRouter>
   </IonApp>
 );
 
