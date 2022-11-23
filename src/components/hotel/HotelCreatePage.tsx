@@ -2,7 +2,7 @@ import React, { useCallback, useContext, useState } from 'react'
 import {
   CheckboxChangeEventDetail,
   DatetimeChangeEventDetail,
-  IonButton,
+  IonButton, IonButtons,
   IonCheckbox,
   IonContent, IonDatetime, IonDatetimeButton,
   IonFooter,
@@ -20,6 +20,7 @@ import { InputChangeEventDetail } from '@ionic/core'
 import { IonInputCustomEvent, IonDatetimeCustomEvent, IonCheckboxCustomEvent } from '@ionic/core/dist/types/components'
 import HotelContext from '../../services/hotel/HotelContext'
 import { RouteComponentProps } from 'react-router'
+import { useConnectionStatus } from '../../hooks/useConnectionStatus'
 
 export interface NewHotelProps {
   name: string,
@@ -35,6 +36,7 @@ const HotelCreatePage: React.FC<RouteComponentProps> = ({ history }) => {
   const [capacity, setCapacity] = useState<number>(0)
   const [dateRegistered, setDateRegistered] = useState<Date>(new Date())
   const [isAvailable, setAvailable] = useState<boolean>(false)
+  const { connectionStatus } = useConnectionStatus()
 
   const { saveHotel } = useContext(HotelContext)
 
@@ -90,7 +92,12 @@ const HotelCreatePage: React.FC<RouteComponentProps> = ({ history }) => {
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>Add new hotel</IonTitle>
+          <IonTitle>Create new hotel</IonTitle>
+          <IonButtons slot="end">
+            <IonButton>
+              {connectionStatus?.connected ? 'Connected' : 'Not connected'}
+            </IonButton>
+          </IonButtons>
         </IonToolbar>
       </IonHeader>
       <IonContent>
