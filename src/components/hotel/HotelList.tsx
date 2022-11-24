@@ -8,10 +8,11 @@ import { ReactComponent } from '*.svg'
 const log = getLogger('HotelList')
 
 interface HotelListInterface {
-  nameSearch: string
+  nameSearch: string,
+  availabilityFilter: string | undefined
 }
 
-const HotelList: React.FC<HotelListInterface> = ({ nameSearch }) => {
+const HotelList: React.FC<HotelListInterface> = ({ nameSearch, availabilityFilter}) => {
   const { hotels, offlineHotels, isLoading, error } = useContext(HotelContext)
   log('render')
   return (
@@ -22,7 +23,20 @@ const HotelList: React.FC<HotelListInterface> = ({ nameSearch }) => {
       ) : hotels && (
         <>
           <IonList>
-            {hotels.filter(hotel => hotel.name.indexOf(nameSearch) >= 0)
+            {hotels
+              .filter(hotel => hotel.name.indexOf(nameSearch) >= 0)
+              .filter(hotel => {
+                switch (availabilityFilter) {
+                  case 'all':
+                    return true
+                  case 'available':
+                    return hotel.isAvailable
+                  case 'unavailable':
+                    return !hotel.isAvailable
+                  default:
+                    return true
+                }
+              })
               .map(hotel => (
               <HotelListItem key={hotel._id}
                              name={hotel.name}
