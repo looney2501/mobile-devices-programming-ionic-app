@@ -1,13 +1,23 @@
 import PropTypes from 'prop-types'
 import React, { memo, useCallback, useContext, useEffect, useReducer } from 'react'
 import { getLogger } from '../../utils/loggerUtils'
-import { initialState, reducer } from '../../reducers/reducer'
-import { GET_HOTELS, LOADING_CHANGED, POST_HOTELS, UI_ERROR } from '../../actions/actionTypes'
+import { HotelProps, initialState, reducer } from '../../reducers/reducer'
+import {
+  CLEAR_HOTELS_OFFLINE,
+  GET_HOTELS,
+  LOADING_CHANGED,
+  POST_HOTELS,
+  POST_HOTELS_OFFLINE,
+  UI_ERROR
+} from '../../actions/actionTypes'
 import { requestGetHotels, requestPostHotels } from '../../actions/hotelActions'
 import HotelContext from './HotelContext'
 import { NewHotelProps } from '../../components/hotel/HotelCreatePage'
 import { createWebSocket } from '../../utils/webSocketUtils'
 import AuthContext from '../auth/AuthContext'
+import { useConnectionStatus } from '../../hooks/useConnectionStatus'
+import { Preferences } from '@capacitor/preferences'
+import { ConnectionStatus } from '@capacitor/network'
 
 const log = getLogger('HotelsProvider')
 
@@ -20,6 +30,32 @@ export type PostHotelFunction = (props: NewHotelProps) => Promise<any>
 const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
   const { token } = useContext(AuthContext)
   const [state, dispatch] = useReducer(reducer, initialState)
+  const { connectionStatus } = useConnectionStatus()
+
+  const handleConnectionStatusChange = useCallback(async () => {
+    const postPendingHotels = async (token: string, offlineHotels: HotelProps[]) => {
+      for (const h of offlineHotels) {
+        const json = JSON.stringify(h)
+        try {
+          log('save local hotel - started')
+          await requestPostHotels(token, h)
+          await Preferences.remove({ key: json })
+          log('save local hotel - succeeded')
+        } catch (e) {
+          console.log('save local hotel - failed')
+        } finally {
+          dispatch({ type: CLEAR_HOTELS_OFFLINE })
+        }
+      }
+    }
+
+    if (connectionStatus?.connected) {
+      const { offlineHotels } = state
+
+      log('connection gained')
+      await postPendingHotels(token, offlineHotels)
+    }
+  }, [connectionStatus?.connected, state.offlineHotels, token])
 
   const fetchHotels = async () => {
     if (!token?.trim()) {
@@ -48,10 +84,18 @@ const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
       log('saveNewHotel - succeeded')
     } catch (e) {
       log('savedNewHotel - failed')
-      dispatch({ type: UI_ERROR, payload: { error: e } })
+      await saveHotelOffline(props)
     } finally {
       dispatch({ type: LOADING_CHANGED, payload: { isLoading: false } })
     }
+  }
+
+  const saveHotelOffline = async (hotel: NewHotelProps) => {
+    log('saveNewHotel - offline - started')
+    dispatch({ type: POST_HOTELS_OFFLINE, payload: { hotel: hotel } })
+    const json = JSON.stringify(hotel)
+    await Preferences.set({ key: json, value: json })
+    log('saveNewHotel - offline - ended')
   }
 
   const wsEffect = () => {
@@ -74,7 +118,8 @@ const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
   }
 
   useEffect(() => {fetchHotels()}, [token])
-  useEffect(wsEffect, [token])
+  useEffect(wsEffect, [token, connectionStatus?.connected])
+  useEffect(() => {handleConnectionStatusChange()}, [handleConnectionStatusChange])
 
   const saveHotel = useCallback<PostHotelFunction>(saveNewHotel, [token])
   const value = { ...state, saveHotel }

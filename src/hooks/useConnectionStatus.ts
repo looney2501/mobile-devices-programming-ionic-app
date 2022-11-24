@@ -2,19 +2,18 @@ import { Network, ConnectionStatusChangeListener, ConnectionStatus } from '@capa
 import { useEffect, useState } from 'react'
 import { getLogger } from '../utils/loggerUtils'
 
-const log = getLogger('useNetwork')
+const log = getLogger('useConnectionStatus')
 
-export const useConnectionStatus = (handleConnectionChanged?: ConnectionStatusChangeListener) => {
+export const useConnectionStatus = () => {
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>()
 
-  const handleConnectionChangedWrapper = (status: ConnectionStatus) => {
+  const handleConnectionChanged = (status: ConnectionStatus) => {
     log('connection status changed to ', Network.getStatus())
-    handleConnectionChanged?.(status)
     setConnectionStatus(status)
   }
 
   useEffect(() => {
-    const handler = Network.addListener('networkStatusChange', handleConnectionChangedWrapper)
+    const handler = Network.addListener('networkStatusChange', handleConnectionChanged)
 
     Network.getStatus().then(status => setConnectionStatus(status))
 

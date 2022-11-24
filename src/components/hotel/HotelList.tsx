@@ -1,13 +1,13 @@
 import React, { useContext } from 'react'
 import { getLogger } from '../../utils/loggerUtils'
-import { IonLoading, IonList } from '@ionic/react'
+import { IonLoading, IonList, IonItem } from '@ionic/react'
 import HotelListItem from './HotelListItem'
 import HotelContext from '../../services/hotel/HotelContext'
 
 const log = getLogger('HotelList')
 
 const HotelList: React.FC = () => {
-  const { hotels, isLoading, error } = useContext(HotelContext)
+  const { hotels, offlineHotels, isLoading, error } = useContext(HotelContext)
   log('render')
   return (
     <>
@@ -15,16 +15,35 @@ const HotelList: React.FC = () => {
       {error?  (
         <div>{error.message || 'Failed to fetch items'}</div>
       ) : hotels && (
-        <IonList>
-          {hotels.map(hotel => (
-            <HotelListItem key={hotel._id}
-                           name={hotel.name}
-                           capacity={hotel.capacity}
-                           isAvailable={hotel.isAvailable}
-                           dateRegistered={hotel.dateRegistered}
-            />
-          ))}
-        </IonList>
+        <>
+          <IonList>
+            {hotels.map(hotel => (
+              <HotelListItem key={hotel._id}
+                             name={hotel.name}
+                             capacity={hotel.capacity}
+                             isAvailable={hotel.isAvailable}
+                             dateRegistered={hotel.dateRegistered}
+              />
+            ))}
+          </IonList>
+          {
+            offlineHotels && offlineHotels.length > 0 && (
+              <>
+                <IonItem color="warning">
+                  The following hotels are locally saved only:
+                </IonItem>
+                {offlineHotels.map((hotel, i) => (
+                  <HotelListItem key={i}
+                                 name={hotel.name}
+                                 capacity={hotel.capacity}
+                                 isAvailable={hotel.isAvailable}
+                                 dateRegistered={hotel.dateRegistered}
+                  />
+                ))}
+              </>
+            )
+          }
+        </>
       )}
     </>
   )

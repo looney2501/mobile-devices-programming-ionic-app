@@ -1,4 +1,11 @@
-import { GET_HOTELS, LOADING_CHANGED, UI_ERROR, POST_HOTELS } from '../actions/actionTypes'
+import {
+  GET_HOTELS,
+  LOADING_CHANGED,
+  UI_ERROR,
+  POST_HOTELS,
+  POST_HOTELS_OFFLINE,
+  CLEAR_HOTELS_OFFLINE
+} from '../actions/actionTypes'
 import { PostHotelFunction } from '../services/hotel/HotelProvider'
 
 export interface HotelProps {
@@ -11,6 +18,7 @@ export interface HotelProps {
 
 export interface State {
   hotels: HotelProps[],
+  offlineHotels: HotelProps[]
   isLoading: boolean,
   error?: Error
   saveHotel?: PostHotelFunction
@@ -24,6 +32,7 @@ interface ActionProps {
 
 export const initialState: State = {
   hotels: [],
+  offlineHotels: [],
   isLoading: false,
   error: undefined
 }
@@ -38,6 +47,11 @@ export const reducer: (state: State, action: ActionProps) => State =
       case POST_HOTELS:
         const hotels = state.hotels.concat(action.payload.hotel)
         return { ...state, hotels: hotels, error: undefined}
+      case POST_HOTELS_OFFLINE:
+        const offlineHotels = state.offlineHotels.concat(action.payload.hotel)
+        return { ...state, offlineHotels: offlineHotels, error: undefined }
+      case CLEAR_HOTELS_OFFLINE:
+        return { ...state, offlineHotels: [] }
       case UI_ERROR:
         return { ...state, error: action.payload.error }
       default:
