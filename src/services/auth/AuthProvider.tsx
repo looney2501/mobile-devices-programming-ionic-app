@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import AuthContext, { AuthState, initialState, LoginFn } from './AuthContext'
 import { getLogger } from '../../utils/loggerUtils'
 import { requestPostLogin } from '../../actions/authActions'
+import { Preferences } from '@capacitor/preferences'
 
 interface AuthProviderProps {
   children: PropTypes.ReactNodeLike
@@ -37,6 +38,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       })
       const { username, password } = state
       const { token } = await requestPostLogin(username, password)
+
       log('authentication succeeded')
       setState({
         ...state,
@@ -45,6 +47,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         isAuthenticated: true,
         isAuthenticating: false
       })
+      await Preferences.set({ key: 'authorization-token', value: token })
     } catch (error: Error | any) {
       log('authentication failed')
       setState({
@@ -56,10 +59,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
+  const checkAuthorization = async () => {
+    const token = await Preferences.get({ key: 'authorization-token' })
+    if (token.value) {
+      setState({
+        ...state,
+        token: token.value,
+        isAuthenticated: true
+      })
+    }
+  }
+
+  const logoutCallback = async () => {
+    log('logout')
+    await Preferences.remove({ key: 'authorization-token' })
+    setState({
+      ...state,
+      isAuthenticated: false,
+      token: ''
+    })
+  }
+
+  useEffect(() => {checkAuthorization()}, [])
   useEffect(() => {authenticationEffect()}, [pendingAuth])
 
   const login = useCallback<LoginFn>(loginCallback, [])
-  const value = { isAuthenticated, login, isAuthenticating, authError, token }
+  const logout = useCallback(logoutCallback, [])
+  const value = { isAuthenticated, login, logout, isAuthenticating, authError, token }
 
   log('returns', value)
 

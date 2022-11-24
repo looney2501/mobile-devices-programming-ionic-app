@@ -8,14 +8,16 @@ import {
   IonHeader,
   IonToolbar, IonButtons, IonButton
 } from '@ionic/react'
-import React from 'react'
+import React, { useContext } from 'react'
 import HotelList from './HotelList'
 import { add } from 'ionicons/icons'
 import { RouteComponentProps, useHistory } from 'react-router'
 import { useConnectionStatus } from '../../hooks/useConnectionStatus'
+import AuthContext from '../../services/auth/AuthContext'
 
 const HotelHomePage: React.FC<RouteComponentProps> = ({ history }) => {
   const { connectionStatus } = useConnectionStatus()
+  const { logout } = useContext(AuthContext)
 
   return (
     <IonPage>
@@ -25,6 +27,14 @@ const HotelHomePage: React.FC<RouteComponentProps> = ({ history }) => {
           <IonButtons slot="end">
             <IonButton>
               {connectionStatus?.connected ? 'Connected' : 'Not connected'}
+            </IonButton>
+            <IonButton
+              color="danger"
+              onClick={() => {
+                logout?.()
+              }}
+            >
+              Logout
             </IonButton>
           </IonButtons>
         </IonToolbar>

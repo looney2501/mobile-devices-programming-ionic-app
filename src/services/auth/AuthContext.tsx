@@ -7,6 +7,7 @@ export interface AuthState {
   isAuthenticated: boolean,
   isAuthenticating: boolean,
   login?: LoginFn,
+  logout?: Function
   pendingAuth?: boolean,
   username?: string,
   password?: string,

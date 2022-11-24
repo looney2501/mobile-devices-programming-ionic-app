@@ -60,6 +60,7 @@ export const Login: React.FC<RouteComponentProps> = () => {
             username: e.detail.value || ''
           })}/>
         <IonInput
+          type="password"
           placeholder="Password"
           value={password}
           onIonChange={e => setState({
