@@ -3,10 +3,15 @@ import { getLogger } from '../../utils/loggerUtils'
 import { IonLoading, IonList, IonItem } from '@ionic/react'
 import HotelListItem from './HotelListItem'
 import HotelContext from '../../services/hotel/HotelContext'
+import { ReactComponent } from '*.svg'
 
 const log = getLogger('HotelList')
 
-const HotelList: React.FC = () => {
+interface HotelListInterface {
+  nameSearch: string
+}
+
+const HotelList: React.FC<HotelListInterface> = ({ nameSearch }) => {
   const { hotels, offlineHotels, isLoading, error } = useContext(HotelContext)
   log('render')
   return (
@@ -17,7 +22,8 @@ const HotelList: React.FC = () => {
       ) : hotels && (
         <>
           <IonList>
-            {hotels.map(hotel => (
+            {hotels.filter(hotel => hotel.name.indexOf(nameSearch) >= 0)
+              .map(hotel => (
               <HotelListItem key={hotel._id}
                              name={hotel.name}
                              capacity={hotel.capacity}
