@@ -1,6 +1,13 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { getLogger } from '../../utils/loggerUtils'
-import { IonLoading, IonList, IonItem, IonInfiniteScroll, IonInfiniteScrollContent } from '@ionic/react'
+import {
+  IonLoading,
+  IonList,
+  IonItem,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
+  createAnimation
+} from '@ionic/react'
 import HotelListItem from './HotelListItem'
 import HotelContext from '../../services/hotel/HotelContext'
 import { ReactComponent } from '*.svg'
@@ -37,8 +44,21 @@ const HotelList: React.FC<HotelListInterface> = ({ nameSearch, availabilityFilte
     }
   }
 
+  const animation = () => {
+    const el = document.querySelectorAll('.hotel-list')
+    if (el) {
+      const animation = createAnimation()
+        .addElement(el)
+        .duration(1000)
+        .fromTo('transform', 'translateX(50%)', 'translateX(0px)')
+
+      animation.play()
+    }
+  }
+
   useEffect(() => setAllHotels(hotels.concat(offlineHotels)), [hotels, offlineHotels])
   useEffect(fetchData, [allHotels])
+  useEffect(animation, [])
 
   log('render')
   return (
@@ -48,7 +68,7 @@ const HotelList: React.FC<HotelListInterface> = ({ nameSearch, availabilityFilte
         <div>{error.message || 'Failed to fetch items'}</div>
       ) : allHotelsPaginated && (
         <>
-          <IonList>
+          <IonList className="hotel-list">
             {allHotelsPaginated
               .filter(hotel => hotel.name.indexOf(nameSearch) >= 0)
               .filter(hotel => {
