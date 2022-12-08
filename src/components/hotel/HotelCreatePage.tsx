@@ -21,12 +21,15 @@ import { IonInputCustomEvent, IonDatetimeCustomEvent, IonCheckboxCustomEvent } f
 import HotelContext from '../../services/hotel/HotelContext'
 import { RouteComponentProps } from 'react-router'
 import { useConnectionStatus } from '../../hooks/useConnectionStatus'
+import { useMyLocation } from '../../hooks/useMyLocation'
+import MyMap, { MapClickEvent } from '../map/MyMap'
 
 export interface NewHotelProps {
   name: string,
   capacity: number,
   isAvailable: boolean,
-  dateRegistered?: Date
+  dateRegistered?: Date,
+  location?: { longitude?: number, latitude?: number }
 }
 
 const log = getLogger('HotelCreatePage')
@@ -37,6 +40,8 @@ const HotelCreatePage: React.FC<RouteComponentProps> = ({ history }) => {
   const [dateRegistered, setDateRegistered] = useState<Date>(new Date())
   const [isAvailable, setAvailable] = useState<boolean>(false)
   const { connectionStatus } = useConnectionStatus()
+  const { location, setLocation } = useMyLocation()
+  const { latitude: lat, longitude: lng } = location
 
   const { saveHotel } = useContext(HotelContext)
 
@@ -61,12 +66,18 @@ const HotelCreatePage: React.FC<RouteComponentProps> = ({ history }) => {
     setDateRegistered(newDate)
   }, [])
 
-  const handleSetAvailable = useCallback((e: IonCheckboxCustomEvent<CheckboxChangeEventDetail<any>>) => {
+  const handleSetAvailable = useCallback((e: IonCheckboxCustomEvent<CheckboxChangeEventDetail>) => {
     e.preventDefault()
     const newAvailability = e.detail.checked
     log('handleSetAvailable newAvailability = ' + newAvailability)
     setAvailable(newAvailability)
   }, [])
+
+  const handleSetLocation = useCallback((e: MapClickEvent) => {
+    const newLocation = { longitude: e.longitude, latitude: e.latitude }
+    log('handleSetLocation newLocation = ', newLocation)
+    setLocation(newLocation)
+  }, [setLocation])
 
   const clearInputs = useCallback(() => {
     setName('')
@@ -81,10 +92,10 @@ const HotelCreatePage: React.FC<RouteComponentProps> = ({ history }) => {
   }, [history, clearInputs])
 
   const handleSaveHotel = useCallback(() => {
-    const newHotel: NewHotelProps = { name, capacity, dateRegistered, isAvailable }
+    const newHotel: NewHotelProps = { name, capacity, dateRegistered, isAvailable, location }
     log(`handleSaveHotel newHotel = ${JSON.stringify(newHotel, null, 2)}`)
     saveHotel && saveHotel(newHotel).then(() => handleCancel())
-  }, [capacity, dateRegistered, isAvailable, name])
+  }, [capacity, dateRegistered, isAvailable, name, location])
 
   log('render')
 
@@ -136,6 +147,15 @@ const HotelCreatePage: React.FC<RouteComponentProps> = ({ history }) => {
             slot="start"
             onIonChange={handleSetAvailable}
           ></IonCheckbox>
+        </IonItem>
+        <IonItem>
+          {lat && lng && (
+            <MyMap
+              lat={lat}
+              lng={lng}
+              onMapClick={handleSetLocation}
+            />
+          )}
         </IonItem>
       </IonContent>
       <IonFooter>

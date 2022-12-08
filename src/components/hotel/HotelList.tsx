@@ -90,6 +90,7 @@ const HotelList: React.FC<HotelListInterface> = ({ nameSearch, availabilityFilte
                                capacity={hotel.capacity}
                                isAvailable={hotel.isAvailable}
                                dateRegistered={hotel.dateRegistered}
+                               location={hotel.location}
                 />
             ))}
           </IonList>

@@ -17,7 +17,6 @@ import { createWebSocket } from '../../utils/webSocketUtils'
 import AuthContext from '../auth/AuthContext'
 import { useConnectionStatus } from '../../hooks/useConnectionStatus'
 import { Preferences } from '@capacitor/preferences'
-import { ConnectionStatus } from '@capacitor/network'
 
 const log = getLogger('HotelsProvider')
 
@@ -79,7 +78,6 @@ const HotelProvider: React.FC<HotelProviderProps> = ({ children }) => {
     try {
       log('saveNewHotel - started')
       dispatch({ type: LOADING_CHANGED, payload: { isLoading: true } })
-      log(token)
       await requestPostHotels(token, props)
       log('saveNewHotel - succeeded')
     } catch (e) {

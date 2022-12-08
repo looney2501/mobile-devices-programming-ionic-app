@@ -14,6 +14,7 @@ export interface HotelProps {
   capacity: number;
   isAvailable: boolean;
   dateRegistered: Date;
+  location: { longitude: number, latitude: number };
 }
 
 export interface State {
