@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { HotelProps } from '../../reducers/reducer'
 import { createAnimation, IonButton, IonModal } from '@ionic/react'
 import moment from 'moment'
+import MyMap from '../map/MyMap'
 
 interface HotelDetailsModalProps {
   hotelProps: HotelProps,
@@ -10,6 +11,9 @@ interface HotelDetailsModalProps {
 }
 
 const HotelDetailsModal: React.FC<HotelDetailsModalProps> = ({ hotelProps, showModal, setShowModal }) => {
+  const { latitude, longitude } = hotelProps.location
+
+
   const enterAnimation = (baseEl: any) => {
     const root = baseEl.shadowRoot;
 
@@ -35,7 +39,6 @@ const HotelDetailsModal: React.FC<HotelDetailsModalProps> = ({ hotelProps, showM
     return enterAnimation(baseEl).direction('reverse');
   }
 
-
   return (
     <IonModal isOpen={showModal} enterAnimation={enterAnimation} leaveAnimation={leaveAnimation}>
       <div style={{ height: "100%", display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -47,6 +50,11 @@ const HotelDetailsModal: React.FC<HotelDetailsModalProps> = ({ hotelProps, showM
           <p>{`Active since: ${moment(hotelProps.dateRegistered).toString()}`}</p>
           <p>Capacity: {hotelProps.capacity}</p>
           <p>{hotelProps.isAvailable ? 'Available' : 'Unavailable'}</p>
+          <MyMap
+            lat={latitude}
+            lng={longitude}
+            editable={false}
+          />
         </div>
         <IonButton onClick={() => setShowModal(false)}>Close Modal</IonButton>
       </div>

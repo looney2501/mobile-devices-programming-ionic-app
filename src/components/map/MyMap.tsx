@@ -11,12 +11,13 @@ export interface MapClickEvent {
 interface MyMapProps {
   lat: number;
   lng: number;
-  onMapClick: (e: MapClickEvent) => void
+  onMapClick?: (e: MapClickEvent) => void;
+  editable: boolean
 }
 
 const log = getLogger('MyMap')
 
-const MyMap: React.FC<MyMapProps> = ({ lat, lng, onMapClick }) => {
+const MyMap: React.FC<MyMapProps> = ({ lat, lng, onMapClick, editable }) => {
   const mapRef = useRef<HTMLElement>(null)
   const [markerId, setMarkerId] = useState<string>('')
   const [googleMap, setGoogleMap] = useState<GoogleMap>()
@@ -53,7 +54,7 @@ const MyMap: React.FC<MyMapProps> = ({ lat, lng, onMapClick }) => {
   }
 
   const myMapChangeMarkerEffect = async () => {
-    if (markerId) {
+    if (editable && markerId && onMapClick) {
       await googleMap?.setOnMapClickListener(async ({ latitude, longitude }) => {
         onMapClick({ latitude, longitude })
         log('deleting old marker =', markerId)
@@ -68,13 +69,13 @@ const MyMap: React.FC<MyMapProps> = ({ lat, lng, onMapClick }) => {
   }
 
   return (
-    <div className="component-wrapper">
+    <div style={{ width: '100%' }}>
       <capacitor-google-map
         ref={mapRef}
         style={{
           display: 'block',
-          width: 300,
-          height: 400
+          width: '100%',
+          height: 300
         }}
       />
     </div>

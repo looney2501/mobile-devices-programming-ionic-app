@@ -154,6 +154,7 @@ const HotelCreatePage: React.FC<RouteComponentProps> = ({ history }) => {
               lat={lat}
               lng={lng}
               onMapClick={handleSetLocation}
+              editable={true}
             />
           )}
         </IonItem>
