@@ -1,6 +1,5 @@
 import { GoogleMap } from '@capacitor/google-maps'
 import React, { useEffect, useRef, useState } from 'react'
-import { mapsApiKey } from '../../utils/mapUtils'
 import { getLogger } from '../../utils/loggerUtils'
 
 export interface MapClickEvent {
@@ -39,7 +38,7 @@ const MyMap: React.FC<MyMapProps> = ({ lat, lng, onMapClick, editable }) => {
       let newGoogleMap = await GoogleMap.create({
         id: 'my-cool-map',
         element: mapRef.current,
-        apiKey: mapsApiKey,
+        apiKey: process.env.REACT_APP_GOOGLE_API_KEY!,
         config: {
           center: { lat, lng },
           zoom: 14
