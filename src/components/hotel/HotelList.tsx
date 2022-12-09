@@ -91,6 +91,7 @@ const HotelList: React.FC<HotelListInterface> = ({ nameSearch, availabilityFilte
                                isAvailable={hotel.isAvailable}
                                dateRegistered={hotel.dateRegistered}
                                location={hotel.location}
+                               base64Photo={hotel.base64Photo}
                 />
             ))}
           </IonList>

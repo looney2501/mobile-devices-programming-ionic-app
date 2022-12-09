@@ -4,9 +4,9 @@ import {
   DatetimeChangeEventDetail,
   IonButton, IonButtons,
   IonCheckbox,
-  IonContent, IonDatetime, IonDatetimeButton,
+  IonContent, IonDatetime, IonDatetimeButton, IonFab, IonFabButton,
   IonFooter,
-  IonHeader,
+  IonHeader, IonIcon, IonImg,
   IonInput,
   IonItem,
   IonLabel, IonModal,
@@ -23,13 +23,17 @@ import { RouteComponentProps } from 'react-router'
 import { useConnectionStatus } from '../../hooks/useConnectionStatus'
 import { useMyLocation } from '../../hooks/useMyLocation'
 import MyMap, { MapClickEvent } from '../map/MyMap'
+import { useCamera } from '../../hooks/useCamera'
+import { useFilesystem } from '../../hooks/useFilesystem'
+import { camera } from 'ionicons/icons'
 
 export interface NewHotelProps {
   name: string,
   capacity: number,
   isAvailable: boolean,
   dateRegistered?: Date,
-  location?: { longitude?: number, latitude?: number }
+  location?: { longitude?: number, latitude?: number },
+  base64Photo: string
 }
 
 const log = getLogger('HotelCreatePage')
@@ -39,9 +43,12 @@ const HotelCreatePage: React.FC<RouteComponentProps> = ({ history }) => {
   const [capacity, setCapacity] = useState<number>(0)
   const [dateRegistered, setDateRegistered] = useState<Date>(new Date())
   const [isAvailable, setAvailable] = useState<boolean>(false)
+  const [base64Photo, setBase64Photo] = useState<string>('')
   const { connectionStatus } = useConnectionStatus()
   const { location, setLocation } = useMyLocation()
   const { latitude: lat, longitude: lng } = location
+  const { getPhoto } = useCamera()
+  const { writeFile } = useFilesystem()
 
   const { saveHotel } = useContext(HotelContext)
 
@@ -79,6 +86,25 @@ const HotelCreatePage: React.FC<RouteComponentProps> = ({ history }) => {
     setLocation(newLocation)
   }, [setLocation])
 
+  const handleTakeNewPhoto = useCallback(async () => {
+    const { base64String } = await getPhoto();
+    log('handleTakeNewPhoto newPhoto = ', base64String)
+    setBase64Photo(base64String!)
+  }, [])
+
+  const savePhotoToFile = useCallback(async () => {
+    const filepath = new Date().getTime() + '.jpeg';
+    log('handleTakeNewPhoto filePath = ', filepath)
+    await writeFile(filepath, base64Photo)
+  }, [base64Photo])
+
+  const handleSaveHotel = useCallback(async () => {
+    await savePhotoToFile()
+    const newHotel: NewHotelProps = { name, capacity, dateRegistered, isAvailable, location, base64Photo }
+    log(`handleSaveHotel newHotel = ${JSON.stringify(newHotel, null, 2)}`)
+    saveHotel && saveHotel(newHotel).then(() => handleCancel())
+  }, [capacity, dateRegistered, isAvailable, name, location, base64Photo])
+
   const clearInputs = useCallback(() => {
     setName('')
     setCapacity(0)
@@ -90,12 +116,6 @@ const HotelCreatePage: React.FC<RouteComponentProps> = ({ history }) => {
     clearInputs()
     history.push('/hotels')
   }, [history, clearInputs])
-
-  const handleSaveHotel = useCallback(() => {
-    const newHotel: NewHotelProps = { name, capacity, dateRegistered, isAvailable, location }
-    log(`handleSaveHotel newHotel = ${JSON.stringify(newHotel, null, 2)}`)
-    saveHotel && saveHotel(newHotel).then(() => handleCancel())
-  }, [capacity, dateRegistered, isAvailable, name, location])
 
   log('render')
 
@@ -112,6 +132,18 @@ const HotelCreatePage: React.FC<RouteComponentProps> = ({ history }) => {
         </IonToolbar>
       </IonHeader>
       <IonContent>
+        <IonItem>
+          <div style={{ height: 160, width: 120, display: 'flex', alignItems: 'center' }}>
+            {base64Photo !== '' ? (
+              <IonImg src={`data:image/jpeg;base64,${base64Photo}`}/>
+            ) : 'Your photo here'}
+          </div>
+          <IonFab horizontal="end">
+            <IonFabButton onClick={handleTakeNewPhoto}>
+              <IonIcon icon={camera}/>
+            </IonFabButton>
+          </IonFab>
+        </IonItem>
         <IonItem>
           <IonLabel>Name:</IonLabel>
           <IonInput

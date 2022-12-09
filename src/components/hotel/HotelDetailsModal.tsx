@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { HotelProps } from '../../reducers/reducer'
-import { createAnimation, IonButton, IonModal } from '@ionic/react'
+import { createAnimation, IonButton, IonImg, IonModal } from '@ionic/react'
 import moment from 'moment'
 import MyMap from '../map/MyMap'
 
@@ -41,23 +41,31 @@ const HotelDetailsModal: React.FC<HotelDetailsModalProps> = ({ hotelProps, showM
 
   return (
     <IonModal isOpen={showModal} enterAnimation={enterAnimation} leaveAnimation={leaveAnimation}>
-      <div style={{ height: "100%", display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-        <div style={{ margin: "0 10px" }}>
-          {!hotelProps._id && (
-            <p style={{ backgroundColor: "yellow", color: "black" }}>!!!Locally saved only</p>
-          )}
-          <p>{hotelProps.name}</p>
-          <p>{`Active since: ${moment(hotelProps.dateRegistered).toString()}`}</p>
-          <p>Capacity: {hotelProps.capacity}</p>
-          <p>{hotelProps.isAvailable ? 'Available' : 'Unavailable'}</p>
-          <MyMap
-            lat={latitude}
-            lng={longitude}
-            editable={false}
-          />
+      <div style={{ display: 'flex' }}>
+        <div style={{ height: 160, width: 120, display: 'flex', alignItems: 'center' }}>
+          {hotelProps.base64Photo !== '' ? (
+            <IonImg src={`data:image/jpeg;base64,${hotelProps.base64Photo}`}/>
+          ) : 'Your photo here'}
         </div>
-        <IonButton onClick={() => setShowModal(false)}>Close Modal</IonButton>
+        <div style={{ height: "100%", display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div style={{ margin: "0 10px" }}>
+            {!hotelProps._id && (
+              <p style={{ backgroundColor: "yellow", color: "black" }}>!!!Locally saved only</p>
+            )}
+            <p>{hotelProps.name}</p>
+            <p>{`Active since: ${moment(hotelProps.dateRegistered).toString()}`}</p>
+            <p>Capacity: {hotelProps.capacity}</p>
+            <p>{hotelProps.isAvailable ? 'Available' : 'Unavailable'}</p>
+
+          </div>
+        </div>
       </div>
+      <MyMap
+        lat={latitude}
+        lng={longitude}
+        editable={false}
+      />
+      <IonButton onClick={() => setShowModal(false)}>Close Modal</IonButton>
     </IonModal>
   )
 }
